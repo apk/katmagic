@@ -71,9 +71,11 @@ void *worker(void *params) { // life cycle of a cracking pthread
       base32_onion(onion, buf); // base32-encode SHA1 digest
       loop++;                   // keep track of our tries...
 
+#if 0
       if (loop % 10000000 == 0) {
 	printf ("%s\n", onion);
       }
+#endif
 
       if(!regexec(regex, onion, 0, 0, 0)) { // check for a match
 
@@ -142,7 +144,7 @@ void *monitor_proc(void *unused) {
     //this next little section sleeps 20 seconds before continuing
     //and checks every second whether the maximum execution time (-x) has
     //been reached.
-    for(i=0;i<20;i++){
+    for(i=0;i<5;i++){
       sleep(1);
       time_t current = time(NULL);
       time_t elapsed = current - start;
@@ -151,6 +153,8 @@ void *monitor_proc(void *unused) {
           error(X_MAXTIME_REACH);
         }
       }
+      if(found)
+        return 0;
     }
 
 
