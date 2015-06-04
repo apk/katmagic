@@ -138,7 +138,7 @@ void *monitor_proc(void *unused) {
     //this next little section sleeps 20 seconds before continuing
     //and checks every second whether the maximum execution time (-x) has
     //been reached.
-    for(i=0;i<20;i++){
+    for(i=0;i<5;i++){
       sleep(1);
       time_t current = time(NULL);
       time_t elapsed = current - start;
@@ -147,6 +147,8 @@ void *monitor_proc(void *unused) {
           error(X_MAXTIME_REACH);
         }
       }
+      if(found)
+        return 0;
     }
 
 
