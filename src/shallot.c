@@ -285,18 +285,18 @@ int main(int argc, char *argv[]) { // onions are fun, here we go
 
   } else signal(SIGINT, terminate); // die on CTRL-C
 
-  pthread_t thrd;
+  pthread_t* thrd = malloc(threads * sizeof(pthread_t));
 
   // create our threads for 2+ cores
   for(x = 1; x < threads; x++) {
 
-    if(pthread_create(&thrd, NULL, worker, &optimum))
+    if(pthread_create(&thrd[x], NULL, worker, &optimum))
       error(X_THREAD_CREATE);
   }
 
   if(monitor) {
     // TODO: when support is added for -mv, put a message here
-    if(pthread_create(&thrd, NULL, monitor_proc, NULL))
+    if(pthread_create(&thrd[0], NULL, monitor_proc, NULL))
       error(X_THREAD_CREATE);
   }
 
@@ -307,6 +307,18 @@ int main(int argc, char *argv[]) { // onions are fun, here we go
     pthread_join(lucky_thread, NULL); // wait for the lucky thread to exit
   }
 
+  void* res=NULL;
+  for(x = (monitor?0:1); x < threads; x++) {
+    if(lucky_thread == thrd[x])
+      continue;
+
+    pthread_join(thrd[x], &res);
+    free(res);
+    res=NULL;
+  }
+
+  free(thrd);
   regfree(regex);
+  free(regex);
   return 0;
 }

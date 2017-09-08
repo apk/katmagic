@@ -49,7 +49,7 @@ void error(int32_t code) {
     }
 
     case X_REGEX_INVALID: {
-      fprintf(stderr, "ERROR: Pattern cannot contain '-'.\n");
+      fprintf(stderr, "ERROR: Pattern cannot start with '-'.\n");
       break;
     }
 
