@@ -80,11 +80,15 @@ void *worker(void *params) { // life cycle of a cracking pthread
         if(monitor)
           printf("\n"); // keep our printing pretty!
 
-        if(!BN_bin2bn(e_ptr, e_bytes, rsa->e)) // store our e in the actual key
-          error(X_BIGNUM_FAILED);              // and make sure it got there
+        if(!BN_bin2bn(e_ptr, e_bytes, rsa->e)) { // store our e in the actual key
+          RSA_free(rsa);                         // and make sure it got there
+          error(X_BIGNUM_FAILED);
+        }
 
-        if(!sane_key(rsa))        // check our key
+        if(!sane_key(rsa)) {      // check our key
+          RSA_free(rsa);
           error(X_YOURE_UNLUCKY); // bad key :(
+        }
 
         print_onion(onion); // print our domain
         print_prkey(rsa);   // and more importantly the key

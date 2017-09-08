@@ -68,6 +68,7 @@ void print_prkey(RSA *rsa) { // print PEM formatted RSA key
   strncpy(dst, buf->data, buf->length);
   dst[buf->length] = '\0';
   printf("%s", dst);
+  free(dst);
   BUF_MEM_free(buf);
 }
 

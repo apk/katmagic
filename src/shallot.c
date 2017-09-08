@@ -1,5 +1,5 @@
 /* program: shallot (based on the popular onionhash program by Bebop)
- * version: 0.0.2
+ * version: 0.0.4
  * purpose: brute-force customized SHA1-hashes of RSA keys for Tor's
  *          .onion namespace
  * license: OSI-approved MIT License
@@ -225,6 +225,25 @@ int main(int argc, char *argv[]) { // onions are fun, here we go
 
   regex = malloc(REGEX_COMP_LMAX);
 
+  /* .onion addresses can only be [a-z2-7], but here we try to compile a regex
+   * to describe [potentially] valid regexes, complicated by the fact that
+   * a back-reference (\1) or bound ({1,10}) is a valid use of '1' or '0'. I'm
+   * sure there are corner cases where this doesn't hold up, but hopefully it's
+   * better than before, where someone can waste days failing to find a match
+   * for something like '^cat1'.
+   *
+   * https://gitweb.torproject.org/torspec.git/tree/rend-spec.txt#n527
+   */
+  char *nameCheckRegex = "^([]a-z2-7[^?.*|(){},$\\-]*([{\\]1)*([01]})*)+$";
+  if(regcomp(regex, nameCheckRegex, REG_EXTENDED | REG_NOSUB))
+    error(X_REGEX_COMPILE);
+  else {
+    if(0!=regexec(regex, pattern, 0, 0, 0))
+      error(X_REGEX_CHARS);
+    else
+      regfree(regex);
+  }
+
   if(regcomp(regex, pattern, REG_EXTENDED | REG_NOSUB))
     error(X_REGEX_COMPILE);
 
@@ -266,18 +285,18 @@ int main(int argc, char *argv[]) { // onions are fun, here we go
 
   } else signal(SIGINT, terminate); // die on CTRL-C
 
-  pthread_t thrd;
+  pthread_t* thrd = malloc(threads * sizeof(pthread_t));
 
   // create our threads for 2+ cores
   for(x = 1; x < threads; x++) {
 
-    if(pthread_create(&thrd, NULL, worker, &optimum))
+    if(pthread_create(&thrd[x], NULL, worker, &optimum))
       error(X_THREAD_CREATE);
   }
 
   if(monitor) {
     // TODO: when support is added for -mv, put a message here
-    if(pthread_create(&thrd, NULL, monitor_proc, NULL))
+    if(pthread_create(&thrd[0], NULL, monitor_proc, NULL))
       error(X_THREAD_CREATE);
   }
 
@@ -288,6 +307,18 @@ int main(int argc, char *argv[]) { // onions are fun, here we go
     pthread_join(lucky_thread, NULL); // wait for the lucky thread to exit
   }
 
+  void* res=NULL;
+  for(x = (monitor?0:1); x < threads; x++) {
+    if(lucky_thread == thrd[x])
+      continue;
+
+    pthread_join(thrd[x], &res);
+    free(res);
+    res=NULL;
+  }
+
+  free(thrd);
   regfree(regex);
+  free(regex);
   return 0;
 }

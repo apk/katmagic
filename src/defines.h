@@ -5,7 +5,7 @@
 #include <inttypes.h>
 
 // our ever-important version string
-#define VERSION "0.0.3-alpha"
+#define VERSION "0.0.4"
 
 // default values
 #define DEFAULT_THREADS 1 // not used on anything but unknown systems

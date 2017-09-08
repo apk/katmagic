@@ -22,7 +22,7 @@
 #define X_DAEMON_FAILED 0x0E
 #define X_OUT_OF_MEMORY 0x11
 #define X_MAXTIME_REACH 0x12
-
+#define X_REGEX_CHARS   0x13
 
 #ifdef BSD
   // BSD specific defines
