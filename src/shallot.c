@@ -1,5 +1,5 @@
 /* program: shallot (based on the popular onionhash program by Bebop)
- * version: 0.0.2
+ * version: 0.0.4
  * purpose: brute-force customized SHA1-hashes of RSA keys for Tor's
  *          .onion namespace
  * license: OSI-approved MIT License
