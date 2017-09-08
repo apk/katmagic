@@ -43,6 +43,11 @@ void error(int32_t code) {
       break;
     }
 
+    case X_REGEX_CHARS: {
+      fprintf(stderr, "ERROR: Bad pattern; must be [a-z2-7]!\n");
+      break;
+    }
+
     case X_REGEX_INVALID: {
       fprintf(stderr, "ERROR: Pattern cannot contain '-'.\n");
       break;
